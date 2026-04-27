@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Personal Chatbot with Memory</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}" />
+  </head>
+  <body>
+    <div class="app">
+      <header>
+        <h1>Personal Chatbot</h1>
+        <p class="subtitle">Stateful conversations powered by Claude</p>
+        <button id="clear-btn" class="clear-btn" type="button">Clear Memory</button>
+      </header>
+
+      <main id="chat" class="chat" aria-live="polite"></main>
+
+      <form id="chat-form" class="composer">
+        <textarea
+          id="message"
+          placeholder="Ask me anything... I'll remember."
+          rows="2"
+          autocomplete="off"
+          required
+        ></textarea>
+        <button type="submit" id="send-btn">Send</button>
+      </form>
+    </div>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
+  </body>
+</html>
