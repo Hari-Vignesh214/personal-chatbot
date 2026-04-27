@@ -2,7 +2,7 @@
 
 A small web chatbot that **remembers** the conversation across turns — because raw LLM APIs are stateless. The full conversation history is persisted to a local JSON file and replayed back to the model on every turn, so the assistant stays in context.
 
-Powered by [Anthropic Claude](https://www.anthropic.com/) + Flask, with a clean dark-mode UI and a one-click **Clear Memory** button to reset the session.
+Powered by [Google Gemini](https://aistudio.google.com/) (free, no credit card needed) + Flask, with a clean dark-mode UI and a one-click **Clear Memory** button to reset the session.
 
 ## Features
 
@@ -18,7 +18,7 @@ Powered by [Anthropic Claude](https://www.anthropic.com/) + Flask, with a clean 
 | Layer    | Tech                                |
 | -------- | ----------------------------------- |
 | Backend  | Python 3.10+, Flask                 |
-| LLM      | Anthropic Claude (`claude-sonnet-4-5` by default) |
+| LLM      | Google Gemini (`gemini-1.5-flash` by default — free tier) |
 | Storage  | Local JSON file (`memory.json`)     |
 | Frontend | HTML + CSS + vanilla JavaScript     |
 
@@ -43,10 +43,10 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Open `.env` and paste your key from [console.anthropic.com](https://console.anthropic.com/):
+Get a **free** key at [aistudio.google.com/apikey](https://aistudio.google.com/apikey) — just sign in with a Google account, click *Create API key*, copy it. No credit card required. Then open `.env` and paste it:
 
 ```
-ANTHROPIC_API_KEY=sk-ant-...
+GOOGLE_API_KEY=your-key-here
 ```
 
 ### 3. Run
@@ -105,11 +105,19 @@ For multi-user support, key by session/user ID instead of a single `KEY`.
 
 Override defaults via `.env`:
 
-| Variable            | Default              | Purpose                           |
-| ------------------- | -------------------- | --------------------------------- |
-| `ANTHROPIC_API_KEY` | _(required)_         | Your Claude API key               |
-| `CHAT_MODEL`        | `claude-sonnet-4-5`  | Any Claude model ID               |
-| `MAX_TURNS`         | `40`                 | Max history messages sent per call|
+| Variable          | Default              | Purpose                           |
+| ----------------- | -------------------- | --------------------------------- |
+| `GOOGLE_API_KEY`  | _(required)_         | Your Gemini API key (free)        |
+| `CHAT_MODEL`      | `gemini-1.5-flash`   | Any Gemini model ID               |
+| `MAX_TURNS`       | `40`                 | Max history messages sent per call|
+
+## Other free LLM options
+
+If you'd rather use a different free provider, swap the LLM call in `app.py`:
+
+- **[Groq](https://console.groq.com/keys)** — fast inference of open models (Llama 3.3, Mixtral). Free, no credit card.
+- **[OpenRouter](https://openrouter.ai/)** — has a `:free` tier on several models.
+- **[Ollama](https://ollama.com/)** — run models entirely on your own machine, no API needed.
 
 ## License
 

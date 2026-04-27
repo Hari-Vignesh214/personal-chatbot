@@ -2,16 +2,16 @@ import json
 import os
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify
-from anthropic import Anthropic
+import google.generativeai as genai
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__)
-client = Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
 
 MEMORY_FILE = Path(__file__).parent / "memory.json"
-MODEL = os.environ.get("CHAT_MODEL", "claude-sonnet-4-5")
+MODEL = os.environ.get("CHAT_MODEL", "gemini-1.5-flash")
 MAX_TURNS = int(os.environ.get("MAX_TURNS", "40"))
 SYSTEM_PROMPT = (
     "You are a helpful, friendly personal assistant. "
@@ -19,6 +19,21 @@ SYSTEM_PROMPT = (
     "to give consistent, context-aware answers. Refer back to earlier "
     "messages naturally when relevant."
 )
+
+model = genai.GenerativeModel(
+    model_name=MODEL,
+    system_instruction=SYSTEM_PROMPT,
+)
+
+
+def to_gemini(history):
+    return [
+        {
+            "role": "user" if m["role"] == "user" else "model",
+            "parts": [{"text": m["content"]}],
+        }
+        for m in history
+    ]
 
 
 def load_memory():
@@ -60,13 +75,8 @@ def chat():
     context = history[-MAX_TURNS:]
 
     try:
-        response = client.messages.create(
-            model=MODEL,
-            max_tokens=1024,
-            system=SYSTEM_PROMPT,
-            messages=context,
-        )
-        reply = response.content[0].text
+        response = model.generate_content(to_gemini(context))
+        reply = response.text
     except Exception as e:
         # Roll back the user message on failure so retry doesn't duplicate.
         history.pop()
