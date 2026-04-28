@@ -8,6 +8,7 @@ Powered by [Google Gemini](https://aistudio.google.com/) (free, no credit card n
 
 - Persistent conversation memory in `memory.json` (swap for Redis if you scale up)
 - Full history sent back to the LLM on each turn so it remembers earlier messages
+- **Document attachments** — upload `.pdf`, `.docx`, `.txt`, `.md`, `.csv`, code files, and the bot reads them and remembers their contents for future turns
 - Configurable history window (`MAX_TURNS`) to keep prompts bounded
 - One-click **Clear Memory** button with a confirm dialog
 - Reloads previous chat on page refresh
@@ -59,12 +60,25 @@ Visit **http://127.0.0.1:5000** and start chatting.
 
 ## How the memory works
 
-1. Every user message is appended to `memory.json` as `{role, content}`.
-2. Before each call, the last `MAX_TURNS` messages are loaded and sent as `messages=[...]` to Claude.
+1. Every user message is appended to `memory.json` as `{role, content, attachments?}`.
+2. Before each call, the last `MAX_TURNS` messages are loaded and sent to Gemini.
 3. The assistant's reply is appended to the same file.
 4. **Clear Memory** writes an empty array back to `memory.json`.
 
 That's it — there's no vector DB, no summarization. Simple full-history replay, which works great for short and medium conversations.
+
+### How attachments work
+
+When you click 📎 and pick a file:
+
+1. The file is sent as multipart form data alongside your message.
+2. The backend extracts plain text:
+   - `.pdf` → `pypdf` page-by-page extraction
+   - `.docx` → `python-docx` paragraph extraction
+   - `.txt`, `.md`, `.csv`, `.json`, `.py`, `.js`, `.html`, etc. → read directly as UTF-8
+3. The extracted text is stored inside that user message's `attachments` array in `memory.json`.
+4. On every subsequent turn, the file's text is replayed back to Gemini wrapped in `[Attached file: NAME] ... [End of NAME]` markers — so the bot continues to "remember" it for the rest of the session.
+5. Per-file extraction is capped at `PER_FILE_TEXT_LIMIT` characters (default 200k) and total upload size is capped at 25 MB.
 
 ## Project structure
 
@@ -105,11 +119,12 @@ For multi-user support, key by session/user ID instead of a single `KEY`.
 
 Override defaults via `.env`:
 
-| Variable          | Default              | Purpose                           |
-| ----------------- | -------------------- | --------------------------------- |
-| `GOOGLE_API_KEY`  | _(required)_         | Your Gemini API key (free)        |
-| `CHAT_MODEL`      | `gemini-2.5-flash`   | Any Gemini model ID               |
-| `MAX_TURNS`       | `40`                 | Max history messages sent per call|
+| Variable               | Default              | Purpose                                 |
+| ---------------------- | -------------------- | --------------------------------------- |
+| `GOOGLE_API_KEY`       | _(required)_         | Your Gemini API key (free)              |
+| `CHAT_MODEL`           | `gemini-2.5-flash`   | Any Gemini model ID                     |
+| `MAX_TURNS`            | `40`                 | Max history messages sent per call      |
+| `PER_FILE_TEXT_LIMIT`  | `200000`             | Max chars of extracted text per upload  |
 
 ## Other free LLM options
 

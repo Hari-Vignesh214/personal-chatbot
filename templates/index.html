@@ -10,21 +10,27 @@
     <div class="app">
       <header>
         <h1>Personal Chatbot</h1>
-        <p class="subtitle">Stateful conversations powered by Claude</p>
+        <p class="subtitle">Stateful conversations powered by Gemini · attach docs to teach me things</p>
         <button id="clear-btn" class="clear-btn" type="button">Clear Memory</button>
       </header>
 
       <main id="chat" class="chat" aria-live="polite"></main>
 
       <form id="chat-form" class="composer">
-        <textarea
-          id="message"
-          placeholder="Ask me anything... I'll remember."
-          rows="2"
-          autocomplete="off"
-          required
-        ></textarea>
-        <button type="submit" id="send-btn">Send</button>
+        <div id="pending-attachments" class="pending-attachments"></div>
+        <div class="composer-row">
+          <label class="attach-btn" title="Attach files (PDF, DOCX, text, code)">
+            <span aria-hidden="true">📎</span>
+            <input type="file" id="file-input" multiple hidden />
+          </label>
+          <textarea
+            id="message"
+            placeholder="Ask me anything... attach files to add to memory."
+            rows="2"
+            autocomplete="off"
+          ></textarea>
+          <button type="submit" id="send-btn">Send</button>
+        </div>
       </form>
     </div>
     <script src="{{ url_for('static', filename='script.js') }}"></script>
