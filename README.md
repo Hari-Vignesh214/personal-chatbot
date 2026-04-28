@@ -18,7 +18,7 @@ Powered by [Google Gemini](https://aistudio.google.com/) (free, no credit card n
 | Layer    | Tech                                |
 | -------- | ----------------------------------- |
 | Backend  | Python 3.10+, Flask                 |
-| LLM      | Google Gemini (`gemini-1.5-flash` by default — free tier) |
+| LLM      | Google Gemini via `google-genai` SDK (`gemini-2.5-flash` by default — free tier) |
 | Storage  | Local JSON file (`memory.json`)     |
 | Frontend | HTML + CSS + vanilla JavaScript     |
 
@@ -108,7 +108,7 @@ Override defaults via `.env`:
 | Variable          | Default              | Purpose                           |
 | ----------------- | -------------------- | --------------------------------- |
 | `GOOGLE_API_KEY`  | _(required)_         | Your Gemini API key (free)        |
-| `CHAT_MODEL`      | `gemini-1.5-flash`   | Any Gemini model ID               |
+| `CHAT_MODEL`      | `gemini-2.5-flash`   | Any Gemini model ID               |
 | `MAX_TURNS`       | `40`                 | Max history messages sent per call|
 
 ## Other free LLM options

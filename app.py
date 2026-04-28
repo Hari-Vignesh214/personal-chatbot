@@ -2,27 +2,23 @@ import json
 import os
 from pathlib import Path
 from flask import Flask, render_template, request, jsonify
-import google.generativeai as genai
+from google import genai
+from google.genai import types
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__)
-genai.configure(api_key=os.environ.get("GOOGLE_API_KEY"))
+client = genai.Client(api_key=os.environ.get("GOOGLE_API_KEY"))
 
 MEMORY_FILE = Path(__file__).parent / "memory.json"
-MODEL = os.environ.get("CHAT_MODEL", "gemini-1.5-flash")
+MODEL = os.environ.get("CHAT_MODEL", "gemini-2.5-flash")
 MAX_TURNS = int(os.environ.get("MAX_TURNS", "40"))
 SYSTEM_PROMPT = (
     "You are a helpful, friendly personal assistant. "
     "You have access to the full conversation history and should use it "
     "to give consistent, context-aware answers. Refer back to earlier "
     "messages naturally when relevant."
-)
-
-model = genai.GenerativeModel(
-    model_name=MODEL,
-    system_instruction=SYSTEM_PROMPT,
 )
 
 
@@ -75,7 +71,11 @@ def chat():
     context = history[-MAX_TURNS:]
 
     try:
-        response = model.generate_content(to_gemini(context))
+        response = client.models.generate_content(
+            model=MODEL,
+            contents=to_gemini(context),
+            config=types.GenerateContentConfig(system_instruction=SYSTEM_PROMPT),
+        )
         reply = response.text
     except Exception as e:
         # Roll back the user message on failure so retry doesn't duplicate.
